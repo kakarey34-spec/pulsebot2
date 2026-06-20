@@ -1,3 +1,4 @@
+const { MessageFlags } = require('discord.js');
 const store = require('../config/store');
 
 const LEVELS = {
@@ -38,7 +39,7 @@ function isSeller(member) {
 function denyInteraction(interaction, levelName = 'authorized staff') {
   const payload = {
     content: `You do not have permission. This requires **${levelName}** access.`,
-    ephemeral: true,
+    flags: MessageFlags.Ephemeral,
   };
   if (interaction.replied || interaction.deferred) {
     return interaction.editReply(payload);

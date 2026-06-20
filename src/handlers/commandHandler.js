@@ -70,7 +70,7 @@ function createSlashCommandHandler(client) {
       console.error(`Slash /${interaction.commandName} error:`, err);
       const payload = {
         content: 'An error occurred while running that command.',
-        ephemeral: true,
+        flags: require('discord.js').MessageFlags.Ephemeral,
       };
       if (interaction.replied || interaction.deferred) {
         await interaction.editReply(payload).catch(() => null);

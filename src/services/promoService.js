@@ -1,6 +1,9 @@
 const store = require('../config/store');
-const { PROMO_TYPES } = require('./promoService');
 const { getBrandColor, brandFooter } = require('../utils/brand');
+
+const PROMO_TYPES = {
+  discount_percent: 'discount_percent',
+};
 const {
   ContainerBuilder,
   TextDisplayBuilder,
@@ -202,7 +205,7 @@ async function announcePromo(channel, guildId, promo) {
 }
 
 module.exports = {
-  PROMO_TYPES: { discount_percent: 'discount_percent' },
+  PROMO_TYPES,
   normalizeCode,
   getPromo,
   listPromos,

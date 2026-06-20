@@ -36,7 +36,7 @@ module.exports = {
         if (interaction.customId.startsWith('discount_modal:')) {
           const channelId = interaction.customId.split(':')[1];
           const code = interaction.fields.getTextInputValue('code').trim();
-          await interaction.deferReply({ ephemeral: true });
+          await interaction.deferReply({ flags: MessageFlags.Ephemeral });
           const channel = await interaction.guild.channels.fetch(channelId).catch(() => null);
           if (!channel) {
             return interaction.editReply({ content: 'Ticket channel not found.' });
@@ -50,11 +50,11 @@ module.exports = {
 
         if (interaction.customId.startsWith('deny_modal:')) {
           if (!canUse(interaction.member, LEVELS.mod)) {
-            return interaction.reply({ content: 'Only mods can deny payments.', ephemeral: true });
+            return interaction.reply({ content: 'Only mods can deny payments.', flags: MessageFlags.Ephemeral });
           }
           const channelId = interaction.customId.split(':')[1];
           const reason = interaction.fields.getTextInputValue('reason').trim();
-          await interaction.deferReply({ ephemeral: true });
+          await interaction.deferReply({ flags: MessageFlags.Ephemeral });
           const result = await ticketManager.denyPayment(
             interaction.guild,
             channelId,
@@ -75,7 +75,7 @@ module.exports = {
             interaction.channelId !== repChannelId ||
             interaction.user.id !== userId
           ) {
-            return interaction.reply({ content: 'This form is no longer valid.', ephemeral: true });
+            return interaction.reply({ content: 'This form is no longer valid.', flags: MessageFlags.Ephemeral });
           }
 
           const starsRaw = interaction.fields.getTextInputValue('stars').trim();
@@ -83,7 +83,7 @@ module.exports = {
           if (!Number.isInteger(stars) || stars < 1 || stars > 5 || String(stars) !== starsRaw) {
             return interaction.reply({
               content: 'Enter a whole number from 1 to 5 for stars.',
-              ephemeral: true,
+              flags: MessageFlags.Ephemeral,
             });
           }
 
@@ -115,7 +115,7 @@ module.exports = {
 
           return interaction.reply({
             content: 'Your rating has been posted. Thank you!',
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
         return;
@@ -130,7 +130,7 @@ module.exports = {
 
       const ticketCategory = parseTicketOpenCategory(customId);
       if (ticketCategory) {
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
         const result = await ticketManager.createTicket(
           interaction.guild,
           interaction.member,
@@ -148,16 +148,16 @@ module.exports = {
           methodKey
         );
         if (result.error) {
-          return interaction.reply({ content: result.error, ephemeral: true });
+          return interaction.reply({ content: result.error, flags: MessageFlags.Ephemeral });
         }
-        return interaction.reply({ content: 'Payment details sent above.', ephemeral: true });
+        return interaction.reply({ content: 'Payment details sent above.', flags: MessageFlags.Ephemeral });
       }
 
       if (customId.startsWith(`${TICKET_IDS.promo}:`)) {
         const channelId = customId.split(':')[1];
         const ticket = store.getTicket(channelId);
         if (!ticket || ticket.userId !== interaction.user.id) {
-          return interaction.reply({ content: 'Only the ticket owner can redeem here.', ephemeral: true });
+          return interaction.reply({ content: 'Only the ticket owner can redeem here.', flags: MessageFlags.Ephemeral });
         }
 
         const modal = new ModalBuilder()
@@ -181,17 +181,17 @@ module.exports = {
       if (customId === TICKET_IDS.paymentDone) {
         const result = await ticketManager.markPaymentDone(interaction.channel, interaction.user.id);
         if (result.error) {
-          return interaction.reply({ content: result.error, ephemeral: true });
+          return interaction.reply({ content: result.error, flags: MessageFlags.Ephemeral });
         }
-        return interaction.reply({ content: 'Please upload your payment proof.', ephemeral: true });
+        return interaction.reply({ content: 'Please upload your payment proof.', flags: MessageFlags.Ephemeral });
       }
 
       if (customId.startsWith(`${TICKET_IDS.claim}:`)) {
         if (!canUse(interaction.member, LEVELS.mod)) {
-          return interaction.reply({ content: 'Only staff can claim tickets.', ephemeral: true });
+          return interaction.reply({ content: 'Only staff can claim tickets.', flags: MessageFlags.Ephemeral });
         }
         const channelId = customId.split(':')[1];
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
         const result = await ticketManager.claimTicket(interaction.guild, channelId, interaction.member);
         if (result.error) return interaction.editReply({ content: result.error });
         return interaction.editReply({ content: 'Ticket claimed.' });
@@ -199,10 +199,10 @@ module.exports = {
 
       if (customId.startsWith(`${TICKET_IDS.approve}:`)) {
         if (!canUse(interaction.member, LEVELS.mod)) {
-          return interaction.reply({ content: 'Only mods can approve.', ephemeral: true });
+          return interaction.reply({ content: 'Only mods can approve.', flags: MessageFlags.Ephemeral });
         }
         const channelId = customId.split(':')[1];
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
         const result = await ticketManager.approvePayment(interaction.guild, channelId, interaction.member);
         if (result.error) return interaction.editReply({ content: result.error });
         return interaction.editReply({ content: 'Payment approved.' });
@@ -210,7 +210,7 @@ module.exports = {
 
       if (customId.startsWith(`${TICKET_IDS.deny}:`)) {
         if (!canUse(interaction.member, LEVELS.mod)) {
-          return interaction.reply({ content: 'Only mods can deny.', ephemeral: true });
+          return interaction.reply({ content: 'Only mods can deny.', flags: MessageFlags.Ephemeral });
         }
         const channelId = customId.split(':')[1];
         const modal = new ModalBuilder().setCustomId(`deny_modal:${channelId}`).setTitle('Decline payment');
@@ -230,15 +230,15 @@ module.exports = {
 
       if (customId === TICKET_IDS.close) {
         if (!canUse(interaction.member, LEVELS.mod)) {
-          return interaction.reply({ content: 'Only staff can close tickets.', ephemeral: true });
+          return interaction.reply({ content: 'Only staff can close tickets.', flags: MessageFlags.Ephemeral });
         }
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
         await ticketManager.closeTicket(interaction.channel, interaction.user);
         return interaction.editReply({ content: 'Ticket closing...' });
       }
     } catch (err) {
       console.error('Interaction error:', err);
-      const payload = { content: 'Something went wrong.', ephemeral: true };
+      const payload = { content: 'Something went wrong.', flags: MessageFlags.Ephemeral };
       if (interaction.deferred || interaction.replied) {
         await interaction.editReply(payload).catch(() => null);
       } else {

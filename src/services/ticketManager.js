@@ -15,6 +15,7 @@ const promoService = require('./promoService');
 const { refreshAllPanels } = require('./ticketCounters');
 const { logTicket } = require('../utils/logger');
 const { ChannelType, PermissionFlagsBits } = require('discord.js');
+const { OverwriteType } = require('discord-api-types/v10');
 
 const STAGES = {
   OPEN: 'open',
@@ -50,10 +51,16 @@ function staffRoleIds(config) {
 }
 
 function buildPermissionOverwrites(guild, ownerId, config) {
+  const botId = guild.members.me?.id ?? guild.client.user.id;
   const overwrites = [
-    { id: guild.id, deny: [PermissionFlagsBits.ViewChannel] },
+    {
+      id: guild.id,
+      type: OverwriteType.Role,
+      deny: [PermissionFlagsBits.ViewChannel],
+    },
     {
       id: ownerId,
+      type: OverwriteType.Member,
       allow: [
         PermissionFlagsBits.ViewChannel,
         PermissionFlagsBits.SendMessages,
@@ -62,7 +69,8 @@ function buildPermissionOverwrites(guild, ownerId, config) {
       ],
     },
     {
-      id: guild.members.me.id,
+      id: botId,
+      type: OverwriteType.Member,
       allow: [
         PermissionFlagsBits.ViewChannel,
         PermissionFlagsBits.SendMessages,
@@ -74,7 +82,11 @@ function buildPermissionOverwrites(guild, ownerId, config) {
   ];
 
   for (const roleId of staffRoleIds(config)) {
-    overwrites.push({ id: roleId, allow: STAFF_PERMS });
+    overwrites.push({
+      id: roleId,
+      type: OverwriteType.Role,
+      allow: STAFF_PERMS,
+    });
   }
   return overwrites;
 }
@@ -128,6 +140,10 @@ async function createTicket(guild, member, category) {
 
   creationLocks.add(lockKey);
   try {
+    if (!guild.members.me) {
+      await guild.members.fetchMe();
+    }
+
     const { getChannelPrefix, formatChannelName } = require('../utils/brand');
     const prefix = getChannelPrefix(category);
     const channel = await guild.channels.create({
