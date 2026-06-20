@@ -7,7 +7,7 @@ const {
   TextDisplayBuilder,
   MessageFlags,
 } = require('discord.js');
-const { PAYMENT_IDS, TICKET_IDS, parseTicketOpenCategory, buildMessageContainer, CV2 } = require('../utils/components');
+const { PAYMENT_IDS, TICKET_IDS, parseTicketOpenCategory, CV2 } = require('../utils/components');
 const { canUse, LEVELS } = require('../utils/permissions');
 const store = require('../config/store');
 const ticketManager = require('../services/ticketManager');

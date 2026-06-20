@@ -7,6 +7,7 @@ const URL_REGEX =
 
 function containsLink(content) {
   if (!content) return false;
+  URL_REGEX.lastIndex = 0;
   return URL_REGEX.test(content);
 }
 
